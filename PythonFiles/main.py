@@ -1,8 +1,9 @@
 """Run data download for backtesting.
 
 Usage examples:
-    python -m PythonFiles.main
-    python -m PythonFiles.main --symbols Ko PEP --interval 1h --period 6mo
+    py -m pip install -r requirements.txt
+    py -m PythonFiles.main
+    py -m PythonFiles.main --symbols Ko PEP --interval 1h --period 6mo
 
 Note: Yahoo Finance limits intraday intervals (<1d) to roughly the last 60 days.
 For a full 6-month pull, use 1h/1d intervals instead of 5m.
@@ -23,7 +24,12 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    results = GetData.getData(interval=args.interval, period=args.period, namesOfStock=args.symbols)
+    try:
+        results = GetData.getData(interval=args.interval, period=args.period, namesOfStock=args.symbols)
+    except ModuleNotFoundError as error:
+        print(error)
+        return
+
     for symbol, status in results.items():
         print(f"{symbol}: {status}")
 

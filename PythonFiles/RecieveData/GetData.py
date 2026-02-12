@@ -3,8 +3,6 @@
 from pathlib import Path
 from typing import Iterable
 
-import yfinance as yf
-
 
 fileNames = []
 
@@ -16,8 +14,20 @@ def _ticker_data_dir() -> Path:
     return data_dir
 
 
+def _load_yfinance():
+    """Import yfinance with a user-friendly error if it is missing."""
+    try:
+        import yfinance as yf
+    except ModuleNotFoundError as exc:
+        raise ModuleNotFoundError(
+            "Missing dependency 'yfinance'. Install it with: py -m pip install -r requirements.txt"
+        ) from exc
+    return yf
+
+
 def getData(interval: str = "1h", period: str = "6mo", namesOfStock: Iterable[str] = ()) -> dict[str, str]:
     """Download OHLCV data for each ticker and save to TickerData/<ticker>_data.csv."""
+    yf = _load_yfinance()
     data_dir = _ticker_data_dir()
     results: dict[str, str] = {}
 
