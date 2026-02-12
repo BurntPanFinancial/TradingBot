@@ -34,7 +34,43 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--fast-window", type=int, default=5)
     parser.add_argument("--slow-window", type=int, default=20)
     parser.add_argument("--order-size", type=int, default=1)
+    parser.add_argument(
+        "--strategy-param",
+        action="append",
+        default=[],
+        help="Additional strategy params as key=value (can be repeated)",
+    )
     return parser.parse_args()
+
+
+def _parse_strategy_params(raw_params: list[str]) -> dict[str, object]:
+    parsed: dict[str, object] = {}
+    for raw in raw_params:
+        if "=" not in raw:
+            raise ValueError(f"Invalid --strategy-param '{raw}'. Use key=value format.")
+
+        key, value = raw.split("=", 1)
+        value = value.strip()
+
+        if value.lower() in {"true", "false"}:
+            parsed[key] = value.lower() == "true"
+            continue
+
+        try:
+            parsed[key] = int(value)
+            continue
+        except ValueError:
+            pass
+
+        try:
+            parsed[key] = float(value)
+            continue
+        except ValueError:
+            pass
+
+        parsed[key] = value
+
+    return parsed
 
 
 def main() -> None:
@@ -50,14 +86,17 @@ def main() -> None:
         )
     )
 
+    strategy_params = {
+        "fast_window": args.fast_window,
+        "slow_window": args.slow_window,
+        "order_size": args.order_size,
+    }
+    strategy_params.update(_parse_strategy_params(args.strategy_param))
+
     result = engine.run(
         market_data=market_data,
         strategy_module=strategy_module,
-        strategy_params={
-            "fast_window": args.fast_window,
-            "slow_window": args.slow_window,
-            "order_size": args.order_size,
-        },
+        strategy_params=strategy_params,
     )
 
     print("Backtest summary")
