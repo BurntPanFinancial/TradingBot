@@ -1,29 +1,41 @@
-# will be run in a virtual environment
+"""Utilities for downloading and storing ticker data for backtesting."""
+
+from pathlib import Path
+from typing import Iterable
+
 import yfinance as yf
 
-#storing name of file + intervalPeriod for each file
+
 fileNames = []
 
-def getData(interval = "5m", period = "1d", namesOfStock = []):
-    # namesOfStock = ["MSFT", "AAPL", "NVDA"]
-    # namesOfStock = ["K0", "PEP"]
 
-    # interval = "1h"
-    # period = "2d"
+def _ticker_data_dir() -> Path:
+    """Return the repo-local TickerData directory and ensure it exists."""
+    data_dir = Path(__file__).resolve().parents[2] / "TickerData"
+    data_dir.mkdir(parents=True, exist_ok=True)
+    return data_dir
 
 
-    for i in range(len(namesOfStock)):
+def getData(interval: str = "1h", period: str = "6mo", namesOfStock: Iterable[str] = ()) -> dict[str, str]:
+    """Download OHLCV data for each ticker and save to TickerData/<ticker>_data.csv."""
+    data_dir = _ticker_data_dir()
+    results: dict[str, str] = {}
+
+    for ticker in namesOfStock:
         df = yf.download(
-            tickers = namesOfStock[i],
-            interval = interval,
-            period = period,
-            progress = False
-    )
-        fileNames.append([namesOfStock[i], interval + " " + period])
-        # print(fileNames[i])
-        fileName = f"{fileNames[i][0]}_data.csv"
-        df.to_csv(f"../TickerData/{fileName}")
-# add interval names to the end of fileNames
-#intervalPeriod = interval + " " + period
-# fileNames.append(intervalPeriod)
+            tickers=ticker,
+            interval=interval,
+            period=period,
+            progress=False,
+        )
 
+        if df.empty:
+            results[ticker] = "failed"
+            continue
+
+        fileNames.append([ticker, f"{interval} {period}"])
+        file_name = f"{ticker}_data.csv"
+        df.to_csv(data_dir / file_name)
+        results[ticker] = "saved"
+
+    return results
