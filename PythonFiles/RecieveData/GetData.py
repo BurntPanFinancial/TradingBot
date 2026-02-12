@@ -6,6 +6,7 @@ fileNames = []
 
 
 def getData(interval="5m", period="1d", namesOfStock=[]):
+
     # namesOfStock = ["MSFT", "AAPL", "NVDA"]
     # namesOfStock = ["K0", "PEP"]
 
@@ -29,9 +30,14 @@ def updateData(interval="5m", period="5m", namesOfStock=[]):
         )
         fileNames.append([namesOfStock[i], interval + " " + period])
         # print(fileNames[i])
-        fileName = f"{fileNames[i][0]}_data.csv"
+        fileName_buff = f"{fileNames[i][0]}_data_buffer.csv"
         # assume that the file already exists and we are updating it
-        df.to_csv(f"../TickerData/{fileName}", mode="a", header=False)
+        df.to_csv(f"../TickerData/{fileName_buff}", mode="a", index=4, header=False)
+        # add the latest row from the buffer file to the main file
+        fileName = f"{fileNames[i][0]}_data.csv"
+        f = open(f"../TickerData/{fileName_buff}")
+        line = f.readline()
+        print(line)
 
 
 # add interval names to the end of fileNames
