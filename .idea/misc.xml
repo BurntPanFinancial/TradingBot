@@ -3,5 +3,5 @@
   <component name="Black">
     <option name="sdkName" value="Python 3.14 (TradingBot)" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.14 (TradingBot)" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.14 (TradingBotRepo)" project-jdk-type="Python SDK" />
 </project>
